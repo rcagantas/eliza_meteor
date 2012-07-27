@@ -35,7 +35,7 @@
   <div class="navbar navbar-fixed-bottom">
     <div class="navbar-inner">
       <div class="container">
-        <form class="navbar-form pull-left" onsubmit="return false;">
+        <form class="navbar-form pull-left input-append" onsubmit="return false;">
           {{> entry}}
         </form>
       </div>
@@ -46,14 +46,9 @@
   </div>
 </body>
 
-<template name="hello">
-  {{greeting}} 
-  <input type="button" value="Click" />
-</template>
-
 <template name="entry">
   <input type="text" id="messageBox" autofocus="autofocus" class="span6" placeholder="Type your message here.">
-  <button id="messageBoxBtn" class="btn btn-primary" type="button">Post</button>
+  <button class="btn btn-primary span1" id="messageBoxBtn">Post</button>
 </template>
 
 <template name="messages">

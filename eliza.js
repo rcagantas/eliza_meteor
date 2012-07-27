@@ -1,18 +1,6 @@
 Messages = new Meteor.Collection("messages");
 
-if (Meteor.is_client) {
-	Template.hello.greeting = "Welcome to Eliza";
-
-	Template.hello.events = {
-		'click input' : function() {
-			// template data, if any, is available in 'this'
-			if (typeof console !== 'undefined') {
-				Template.hello.greeting = "Clicked";
-				console.log("You pressed the button. " + Template.hello.greeting );
-			}
-		}
-	};
-    
+if (Meteor.is_client) {    
     Template.messages.messages = function() {
         return Messages.find({}, {});
     }
@@ -52,9 +40,7 @@ if (Meteor.is_client) {
         window.scrollTo(0, document.body.scrollHeight);
     };
         
-    Template.entry.events = {
-//        'click #messageBoxBtn': enterText
-    };
+    Template.entry.events = {};
     Template.entry.events['click #messageBoxBtn'] = enterText;
     Template.entry.events[okcancel_events("#messageBox")] = 
     make_okcancel_handler({
