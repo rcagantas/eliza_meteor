@@ -1,0 +1,15 @@
+/* CSS declarations go here */
+body {
+	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+	padding-bottom: 60px;
+}
+
+#conversation {
+    overflow: auto;
+    position: absolute;
+    margin: auto;
+    top: 50px;
+    bottom: 48px;
+    left: 0;
+    right: 0;
+}
