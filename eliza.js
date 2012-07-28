@@ -1,40 +1,54 @@
 Messages = new Meteor.Collection("messages");
 
-if (Meteor.is_client) {    
+if (Meteor.is_client) {
+    var handleTests = function(message) {
+        handleTestModal(message);
+    }
+
+    var handleTestModal = function(message) {
+        var regex = /(testmodal)/g;
+        var result = regex.exec(message);
+        if (result != null && 
+            result.length > 1) {
+            $('#passQuery').modal('show');
+        }
+    }
+
+    var handleRoomCreation = function(message) {
+        console.log("calling handleRoomCreation.");
+        var regex = /create room ([a-z]+)/g;
+        var result = regex.exec(message);
+        if (result != null && 
+            result.length > 1 &&
+            result[1].length > 5) {
+            $('#passQuery').modal('show');
+        }       
+    };
+
+    var handleNameChange = function(message) {
+        var regex = /my name is ([a-z]+)/g;
+        result = regex.exec(message);
+        if (result != null && result.length > 1) {
+            Session.set("name", result[1]);
+        }
+    };
+
+    var getName = function() {
+        return Session.get("name") == undefined? "you" : Session.get("name");
+    };
+
     Template.messages.messages = function() {
         return Messages.find({}, {});
-    }
-    
-	var checkRoomCreation = function (message) {
-	    var regex = /create room ([a-z]+) ([a-z]+)/g;
-	    var result = regex.exec(message);
-	    if (result != null && 
-	        result.length > 1 &&
-	        result[1].length > 5 && 
-	        result[2].length > 9) {
-	        alert(result[1]);
-	        alert(result[2]);
-	    }		
-	};
-
-	var checkNameChange = function(message) {
-		var regex = /my name is ([a-z]+)/g;
-		result = regex.exec(message);
-		if (result != null && result.length > 1) {
-			Session.set("name", result[1]);
-		}
-	};
-
-	var getName = function() {
-		return Session.get("name") == undefined? "You" : Session.get("name");
-	};
+    }    
 
     var enterText = function() {
         var ts = Date.now() / 1000;
         var messageEntry = document.getElementById('messageBox');
         var message = messageEntry.value;
         //console.log("message: " + message);
-        checkNameChange(message);
+        handleTests(message);
+        handleNameChange(message);
+        handleRoomCreation(message);
         Messages.insert({name: getName(), message: message, time: ts});
         messageEntry.value = "";
         window.scrollTo(0, document.body.scrollHeight);
