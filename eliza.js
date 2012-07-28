@@ -15,7 +15,6 @@ if (Meteor.is_client) {
     }
 
     var handleRoomCreation = function(message) {
-        console.log("calling handleRoomCreation.");
         var regex = /create room ([a-z]+)/g;
         var result = regex.exec(message);
         if (result != null && 
@@ -49,7 +48,13 @@ if (Meteor.is_client) {
         handleTests(message);
         handleNameChange(message);
         handleRoomCreation(message);
-        Messages.insert({name: getName(), message: message, time: ts});
+        if (getName() == "you") {
+            var localMessages = document.getElementById('localMessages');
+            localMessages.innerHTML += "<strong>you:</strong> " + message + "</br>";
+            console.log(localMessages);
+        } else {
+            Messages.insert({name: getName(), message: message, time: ts});
+        }
         messageEntry.value = "";
         window.scrollTo(0, document.body.scrollHeight);
     };
