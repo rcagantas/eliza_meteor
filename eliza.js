@@ -36,8 +36,13 @@ if (Meteor.is_client) {
         return Session.get("name") == undefined? "you" : Session.get("name");
     };
 
+    var isLoggedIn = function() {
+        return (getName() != "you");
+    }
+
     Template.messages.messages = function() {
-        return Messages.find({}, {});
+        if (isLoggedIn()) return Messages.find({}, {});
+        return "";
     }    
 
     var enterText = function() {
@@ -48,7 +53,7 @@ if (Meteor.is_client) {
         handleTests(message);
         handleNameChange(message);
         handleRoomCreation(message);
-        if (getName() == "you") {
+        if (!isLoggedIn()) {
             var localMessages = document.getElementById('localMessages');
             localMessages.innerHTML += "<strong>you:</strong> " + message + "</br>";
             console.log(localMessages);
