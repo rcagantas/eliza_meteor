@@ -49,7 +49,7 @@ if (Meteor.is_client) {
         var ts = Date.now() / 1000;
         var messageEntry = document.getElementById('messageBox');
         var message = messageEntry.value;
-        //console.log("message: " + message);
+        console.log("message: " + message);
         handleTests(message);
         handleNameChange(message);
         handleRoomCreation(message);
