@@ -1,27 +1,17 @@
 Messages = new Meteor.Collection("messages");
 
 if (Meteor.is_client) {
-    var handleTests = function(message) {
-        handleTestModal(message);
-    }
-
-    var handleTestModal = function(message) {
-        var regex = /(testmodal)/g;
-        var result = regex.exec(message);
-        if (result != null && 
-            result.length > 1) {
-            $('#passQuery').modal('show');
-        }
-    }
-
     var handleRoomCreation = function(message) {
+        if (!hasName()) return false;
         var regex = /create room ([a-z]+)/g;
         var result = regex.exec(message);
         if (result != null && 
             result.length > 1 &&
             result[1].length > 5) {
             $('#passQuery').modal('show');
-        }       
+            return true;
+        }
+        return false;
     };
 
     var handleNameChange = function(message) {
@@ -29,35 +19,44 @@ if (Meteor.is_client) {
         result = regex.exec(message);
         if (result != null && result.length > 1) {
             Session.set("name", result[1]);
+            return true;
         }
+        return false;
     };
+
+    var clearMessageEntry = function(message) {
+        var messageEntry = document.getElementById('messageBox');
+        messageEntry.value = "";
+    }
 
     var getName = function() {
         return Session.get("name") == undefined? "you" : Session.get("name");
     };
 
-    var isLoggedIn = function() {
-        return (getName() != "you");
+    var getElizaReply = function(message) {
+        return "<strong>eliza:</strong> You said: " + message + "</br>";
     }
 
+    var hasName = function() { return (getName() != "you"); }
+    var isInRoom = function() { return false; }
     Template.messages.messages = function() {
-        if (isLoggedIn()) return Messages.find({}, {});
-        return "";
-    }    
+        return isInRoom()? Messages.find({}, {}) : "";
+    }
 
     var enterText = function() {
         var ts = Date.now() / 1000;
+        var localMessages = document.getElementById('localMessages');
         var messageEntry = document.getElementById('messageBox');
-        var message = messageEntry.value;
-        console.log("message: " + message);
-        handleTests(message);
+        var message = messageEntry.value.toLowerCase();
         handleNameChange(message);
         handleRoomCreation(message);
-        if (!isLoggedIn()) {
-            var localMessages = document.getElementById('localMessages');
-            localMessages.innerHTML += "<strong>you:</strong> " + message + "</br>";
-            console.log(localMessages);
+
+        if (!isInRoom()) {
+            localMessages.innerHTML += 
+                "<strong>" + getName() + ":</strong> " + message + "</br>";
+            localMessages.innerHTML += getElizaReply(message);
         } else {
+            localMessages.innerHTML = "";
             Messages.insert({name: getName(), message: message, time: ts});
         }
         messageEntry.value = "";
