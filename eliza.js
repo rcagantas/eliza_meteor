@@ -1,14 +1,15 @@
 Messages = new Meteor.Collection("messages");
+Rooms = new Meteor.Collection("rooms");
 
 if (Meteor.is_client) {
+    var localMessages = null;
+    var roomPassInput = null;
+    var messageInput = null;
+
     var handleRoomCreation = function(message) {
         if (!hasName()) return false;
-        var regex = /create room ([a-z]+)/g;
-        var result = regex.exec(message);
-        if (result != null && 
-            result.length > 1 &&
-            result[1].length > 5) {
-            $('#passQuery').modal('show');
+        if (message == "create room") {
+            $('#passQueryModal').modal('show');
             return true;
         }
         return false;
@@ -24,50 +25,67 @@ if (Meteor.is_client) {
         return false;
     };
 
-    var clearMessageEntry = function(message) {
-        var messageEntry = document.getElementById('messageBox');
-        messageEntry.value = "";
-    }
-
     var getName = function() {
         return Session.get("name") == undefined? "you" : Session.get("name");
     };
 
+    var elizaSays = function(message) {
+        return "<strong>eliza:</strong> " + message + "</br>";
+    }
+
     var getElizaReply = function(message) {
-        return "<strong>eliza:</strong> You said: " + message + "</br>";
+        return elizaSays("you said: " + message);
     }
 
     var hasName = function() { return (getName() != "you"); }
+
     var isInRoom = function() { return false; }
-    Template.messages.messages = function() {
-        return isInRoom()? Messages.find({}, {}) : "";
-    }
 
     var enterText = function() {
         var ts = Date.now() / 1000;
-        var localMessages = document.getElementById('localMessages');
-        var messageEntry = document.getElementById('messageBox');
-        var message = messageEntry.value.toLowerCase();
-        handleNameChange(message);
-        handleRoomCreation(message);
+        var message = messageInput.value.toLowerCase();
 
-        if (!isInRoom()) {
-            localMessages.innerHTML += 
-                "<strong>" + getName() + ":</strong> " + message + "</br>";
+        localMessages.innerHTML += 
+            "<strong>" + getName() + ":</strong> " + message + "</br>";
+
+        if (handleNameChange(message)) {}
+        else if (handleRoomCreation(message)) {} 
+        else if (!isInRoom()) {
             localMessages.innerHTML += getElizaReply(message);
         } else {
             localMessages.innerHTML = "";
             Messages.insert({name: getName(), message: message, time: ts});
         }
-        messageEntry.value = "";
+        messageInput.value = "";
         window.scrollTo(0, document.body.scrollHeight);
     };
-        
+
+    var roomHandler = function() {
+        var roomPass = roomPassInput.value;
+        localMessages.innerHTML += elizaSays("created room.");
+        $('#passQueryModal').modal('hide');
+    };
+
+    Template.messages.messages = function() {
+        return isInRoom()? Messages.find({}, {}) : "";
+    }
+
+    Meteor.startup(function() {
+        localMessages = document.getElementById('localMessages');
+        messageInput = document.getElementById('messageInput');
+        roomPassInput = document.getElementById("roomPassInput");
+    });
+
     Template.entry.events = {};
-    Template.entry.events['click #messageBoxBtn'] = enterText;
-    Template.entry.events[okcancel_events("#messageBox")] = 
+    Template.entry.events['click #messageInputBtn'] = enterText;
+    Template.entry.events[okcancel_events("#messageInput")] = 
     make_okcancel_handler({
         ok: enterText
+    });
+    Template.roomForm.events = {};
+    Template.roomForm.events[okcancel_events("#roomPassInput")] =
+    make_okcancel_handler({
+        ok: roomHandler
     });
 }
 
