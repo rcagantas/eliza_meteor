@@ -3,12 +3,15 @@ Rooms = new Meteor.Collection("rooms");
 
 if (Meteor.is_client) {
     var localMessages = null;
+    var roomNameInput = null;
     var roomPassInput = null;
     var messageInput = null;
+    var roomModalHeader = null;
 
     var handleRoomCreation = function(message) {
         if (!hasName()) return false;
         if (message == "create room") {
+            roomModalHeader.innerHTML = "Create Room";
             $('#passQueryModal').modal('show');
             return true;
         }
@@ -61,19 +64,24 @@ if (Meteor.is_client) {
     };
 
     var roomHandler = function() {
+        var roomName = roomNameInput.value;
         var roomPass = roomPassInput.value;
-        localMessages.innerHTML += elizaSays("created room.");
+        if (roomModalHeader.innerHTML == "Create Room") {
+            localMessages.innerHTML += elizaSays("created room " + roomName + ".");
+        }
         $('#passQueryModal').modal('hide');
     };
 
-    Template.messages.messages = function() {
+    Template.messageList.messages = function() {
         return isInRoom()? Messages.find({}, {}) : "";
     }
 
     Meteor.startup(function() {
         localMessages = document.getElementById('localMessages');
         messageInput = document.getElementById('messageInput');
+        roomNameInput = document.getElementById('roomNameInput');
         roomPassInput = document.getElementById("roomPassInput");
+        roomModalHeader = document.getElementById("roomModalHeader");
     });
 
     Template.entry.events = {};

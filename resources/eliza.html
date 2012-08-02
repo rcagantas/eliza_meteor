@@ -31,7 +31,7 @@
     <p>
     <div class="container" id="localMessages">
     </div>
-    {{> messages}}
+    {{> messageList }}
     </p>
   </div>
 
@@ -51,7 +51,7 @@
   <div class="modal hide keyboard fade" id="passQueryModal">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">×</button>
-      <h3>Room Password</h3>
+      <h3 id="roomModalHeader"></h3>
     </div>
     <div class="modal-body">
       <form class="well inline" onsubmit="return false;">
@@ -75,7 +75,7 @@
   <button id="messageInputBtn" class="btn btn-primary span1">Post</button>
 </template>
 
-<template name="messages">
+<template name="messageList">
   {{#each messages}}
     {{> message}}
   {{/each}}
