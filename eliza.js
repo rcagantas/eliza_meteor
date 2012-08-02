@@ -7,29 +7,29 @@ if (Meteor.is_client) {
     var roomPassInput = null;
     var messageInput = null;
     var roomModalHeader = null;
+    var userAlias = "you";
+    var lastCommand = null;
 
-    var handleRoomCreation = function(message) {
+    var roomCreateHandler = function(message) {
         if (!hasName()) return false;
         if (message == "create room") {
             roomModalHeader.innerHTML = "Create Room";
             $('#passQueryModal').modal('show');
+            lastCommand = message;
             return true;
         }
         return false;
     };
 
-    var handleNameChange = function(message) {
+    var nameChangeHandler = function(message) {
         var regex = /my name is ([a-z]+)/g;
         result = regex.exec(message);
         if (result != null && result.length > 1) {
-            Session.set("name", result[1]);
+            userAlias = result[1];
+            lastCommand = message;
             return true;
         }
         return false;
-    };
-
-    var getName = function() {
-        return Session.get("name") == undefined? "you" : Session.get("name");
     };
 
     var elizaSays = function(message) {
@@ -40,24 +40,25 @@ if (Meteor.is_client) {
         return elizaSays("you said: " + message);
     }
 
-    var hasName = function() { return (getName() != "you"); }
+    var hasName = function() { return (userAlias != "you"); }
 
     var isInRoom = function() { return false; }
 
-    var enterText = function() {
+    var messageHandler = function() {
         var ts = Date.now() / 1000;
         var message = messageInput.value.toLowerCase();
 
+        if (message == "") return;
         localMessages.innerHTML += 
-            "<strong>" + getName() + ":</strong> " + message + "</br>";
+            "<strong>" + userAlias + ":</strong> " + message + "</br>";
 
-        if (handleNameChange(message)) {}
-        else if (handleRoomCreation(message)) {} 
+        if (nameChangeHandler(message)) {}
+        else if (roomCreateHandler(message)) {} 
         else if (!isInRoom()) {
             localMessages.innerHTML += getElizaReply(message);
         } else {
             localMessages.innerHTML = "";
-            Messages.insert({name: getName(), message: message, time: ts});
+            Messages.insert({name: userAlias, message: message, time: ts});
         }
         messageInput.value = "";
         window.scrollTo(0, document.body.scrollHeight);
@@ -66,10 +67,11 @@ if (Meteor.is_client) {
     var roomHandler = function() {
         var roomName = roomNameInput.value;
         var roomPass = roomPassInput.value;
-        if (roomModalHeader.innerHTML == "Create Room") {
+        if (lastCommand = "create room") {
             localMessages.innerHTML += elizaSays("created room " + roomName + ".");
         }
         $('#passQueryModal').modal('hide');
+        window.scrollTo(0, document.body.scrollHeight);
     };
 
     Template.messageList.messages = function() {
@@ -85,10 +87,10 @@ if (Meteor.is_client) {
     });
 
     Template.entry.events = {};
-    Template.entry.events['click #messageInputBtn'] = enterText;
+    Template.entry.events['click #messageInputBtn'] = messageHandler;
     Template.entry.events[okcancel_events("#messageInput")] = 
     make_okcancel_handler({
-        ok: enterText
+        ok: messageHandler
     });
     Template.roomForm.events = {};
     Template.roomForm.events[okcancel_events("#roomPassInput")] =
