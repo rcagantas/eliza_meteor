@@ -35,7 +35,7 @@ var insertMessage = function(from, message) {
 
 var nameHandler = function(message) {
     message = message.toLowerCase();
-    var regex = /my name is ([a-z]+)/g;
+    var regex = /my name is ([a-z0-9]+)/g;
     var result = regex.exec(message);
     if (result != null && result.length > 1) {
         Session.set("name", result[1]);
