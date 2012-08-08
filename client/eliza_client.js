@@ -6,6 +6,17 @@ var roomModalHeader = null;
 var localMessages = localMessages == null?
     new LocalCollection("localMessages") : localMessages;
 
+var rand = function(min, max) {
+    return parseInt(Math.random() * (max-min+1), 10) + min;
+}
+
+var randomShade = function() {
+    var h = rand(0, 10);
+    var s = rand(0, 10);
+    var l = rand(20, 60);
+    return 'hsl(' + h + ',' + s + '%,' + l + '%)';
+}
+
 var insertMessage = function(from, message) {
     var ts = Date.now() / 1000;
     if (Session.equals("currentRoom", "local")) {
@@ -16,7 +27,9 @@ var insertMessage = function(from, message) {
             time: ts});
     } else {
         Meteor.call("insertMessage", 
-            Session.get("currentRoom"), from, message, ts);
+            Session.get("currentRoom"), 
+            Session.get("color"), 
+            from, message, ts);
     }
 }
 
@@ -25,6 +38,7 @@ var nameHandler = function(message) {
     var result = regex.exec(message);
     if (result != null && result.length > 1) {
         Session.set("name", result[1]);
+        Session.set("color", randomShade());
         return true;
     }
     return false;
@@ -81,6 +95,7 @@ Meteor.startup(function() {
     roomModalHeader = document.getElementById("roomModalHeader");
     Session.set("name","you");
     Session.set("currentRoom", "local");
+    Session.set("currentPage", "mainPage");
     Meteor.autosubscribe(function() {
         Meteor.subscribe("messages", Session.get("currentRoom"));
     });
@@ -93,7 +108,20 @@ Meteor.startup(function() {
     elizaBot = new ElizaBot();
     var initial = elizaBot.getInitial();
     insertMessage("eliza", initial);
+
+    var Workspace = Backbone.Router.extend({
+        routes: { ":page": "redirect" },
+        redirect: function(page) { Session.set("currentPage", page + "Page"); }
+    });
+    Router = new Workspace;
+    Backbone.history.start({pushState: true});
 });
+
+Template.pageSelector.renderPage = function() {
+    var template = Session.get("currentPage");
+    template = template == undefined? "mainPage" : template;
+    return new Handlebars.SafeString(Template[template]());
+}
 
 Template.messageList.messages = function() { 
     return Session.equals("currentRoom", "local")?

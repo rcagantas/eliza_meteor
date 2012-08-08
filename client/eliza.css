@@ -4,16 +4,10 @@ body {
 	padding-bottom: 60px;
 }
 
-#conversation {
-    overflow: auto;
-    position: absolute;
-    margin: auto;
-    top: 50px;
-    bottom: 48px;
-    left: 0;
-    right: 0;
-}
-
 #messageInput {
     float: left;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    background-image: none;
 }

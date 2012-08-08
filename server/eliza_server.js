@@ -4,7 +4,6 @@ Meteor.publish("messages", function(roomName) {
 
 Meteor.methods({
     createRoom: function(roomName, roomPass) {
-        //console.log("creating room " + roomName + " " + roomPass);
         var retVal = (Rooms.find({room: roomName}).count() == 0);
         if (retVal) {
             Rooms.insert({room: roomName, password: roomPass});
@@ -17,9 +16,10 @@ Meteor.methods({
             password: roomPass}).count() > 0;
         return retVal;
     },
-    insertMessage: function(room, from, message, ts) {
+    insertMessage: function(room, color, from, message, ts) {
         Messages.insert({
             room: room,
+            color: color,
             name: from, 
             message: message, 
             time: ts}

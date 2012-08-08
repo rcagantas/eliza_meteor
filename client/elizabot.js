@@ -618,7 +618,7 @@ var elizaKeywords = [
 ]],
 ["hello", 0, [
  ["*", [
-     "How do you do.  Please state your problem.",
+     "How do you do ?  Please state your problem.",
      "Hi.  What seems to be your problem ?"
   ]]
 ]],
@@ -637,7 +637,7 @@ var elizaKeywords = [
  ["* am i *", [
      "Do you believe you are (2) ?",
      "Would you want to be (2) ?",
-     "Do you wish I would tell you you are (2) ?",
+     "Do you wish I would tell why you are (2) ?",
      "What would it mean if you were (2) ?",
      "goto what"
   ]],
