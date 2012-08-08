@@ -17,4 +17,22 @@ Meteor.methods({
             password: roomPass}).count() > 0;
         return retVal;
     },
+    insertMessage: function(room, from, message, ts) {
+        Messages.insert({
+            room: room,
+            name: from, 
+            message: message, 
+            time: ts}
+        );
+
+    }
+});
+
+Meteor.startup(function() {
+    var collections = ['messages', 'rooms'];
+    _.each(collections, function(collection) {
+        _.each(['insert', 'update', 'remove'], function(method) {
+            Meteor.default_server.method_handlers['/' + collection + '/' + method] = function() {};
+        });
+    });
 });

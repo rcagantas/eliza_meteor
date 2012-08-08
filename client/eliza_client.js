@@ -1,27 +1,10 @@
+var elizaBot = null;
 var messageInput = null;
 var roomNameInput = null;
 var roomPassInput = null;
 var roomModalHeader = null;
 var localMessages = localMessages == null?
     new LocalCollection("localMessages") : localMessages;
-
-Meteor.startup(function() {
-    messageInput = document.getElementById('messageInput');
-    roomNameInput = document.getElementById('roomNameInput');
-    roomPassInput = document.getElementById("roomPassInput");
-    roomModalHeader = document.getElementById("roomModalHeader");
-    Session.set("name","you");
-    Session.set("currentRoom", "local");
-    Meteor.autosubscribe(function() {
-        Meteor.subscribe("messages", Session.get("currentRoom"));
-    });
-    $('#passQueryModal').on('hidden', function () {
-        messageInput.focus();
-    });
-    $('#passQueryModal').on('shown', function () {
-        roomNameInput.focus();
-    });
-});
 
 var insertMessage = function(from, message) {
     var ts = Date.now() / 1000;
@@ -32,13 +15,8 @@ var insertMessage = function(from, message) {
             message: message, 
             time: ts});
     } else {
-        console.log(from + ": " + message);
-        Messages.insert({
-            room: Session.get("currentRoom"), 
-            name: from, 
-            message: message, 
-            time: ts}
-        );
+        Meteor.call("insertMessage", 
+            Session.get("currentRoom"), from, message, ts);
     }
 }
 
@@ -71,8 +49,10 @@ var messageHandler = function() {
 
     if (nameHandler(message)) {}
     else if (roomHandler(message)) {} 
-    else if (Session.equals("currentRoom","local")) 
-        insertMessage("eliza", "you said: " + message);
+    else if (Session.equals("currentRoom","local")) {
+        var reply = elizaBot.transform(message);
+        insertMessage("eliza", reply);
+    }
     messageInput.value = "";
     window.scrollTo(0, document.body.scrollHeight);
 };
@@ -94,6 +74,26 @@ var roomHandlerCallback = function() {
     window.scrollTo(0, document.body.scrollHeight);
 };
 
+Meteor.startup(function() {
+    messageInput = document.getElementById('messageInput');
+    roomNameInput = document.getElementById('roomNameInput');
+    roomPassInput = document.getElementById("roomPassInput");
+    roomModalHeader = document.getElementById("roomModalHeader");
+    Session.set("name","you");
+    Session.set("currentRoom", "local");
+    Meteor.autosubscribe(function() {
+        Meteor.subscribe("messages", Session.get("currentRoom"));
+    });
+    $('#passQueryModal').on('hidden', function () {
+        messageInput.focus();
+    });
+    $('#passQueryModal').on('shown', function () {
+        roomNameInput.focus();
+    });
+    elizaBot = new ElizaBot();
+    var initial = elizaBot.getInitial();
+    insertMessage("eliza", initial);
+});
 
 Template.messageList.messages = function() { 
     return Session.equals("currentRoom", "local")?
