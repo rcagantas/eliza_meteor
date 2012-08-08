@@ -34,6 +34,7 @@ var insertMessage = function(from, message) {
 }
 
 var nameHandler = function(message) {
+    message = message.toLowerCase();
     var regex = /my name is ([a-z]+)/g;
     var result = regex.exec(message);
     if (result != null && result.length > 1) {
@@ -57,7 +58,7 @@ var roomHandler = function(message) {
 };
 
 var messageHandler = function() {
-    var message = messageInput.value.toLowerCase();
+    var message = messageInput.value;
     if (message == "") return;
     insertMessage(Session.get("name"), message);
 
