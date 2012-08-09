@@ -16,6 +16,15 @@ Meteor.methods({
             password: roomPass}).count() > 0;
         return retVal;
     },
+    destroyRoom: function(roomName, roomPass) {
+        Rooms.remove({
+            room: roomName,
+            password: roomPass}, function(e) {
+            if (!e) {
+                Messages.remove({room: roomName});
+            }
+        });
+    },
     insertMessage: function(room, color, from, message, ts) {
         Messages.insert({
             room: room,
@@ -31,7 +40,9 @@ Meteor.methods({
 Meteor.startup(function() {
     var collections = ['messages', 'rooms'];
     _.each(collections, function(collection) {
-        _.each(['insert', 'update', 'remove'], function(method) {
+        //_.each(['insert', 'update', 'remove'], function(method) {
+        // allow inserts on the client
+        _.each(['update', 'remove'], function(method) {
             Meteor.default_server.method_handlers['/' + collection + '/' + method] = function() {};
         });
     });

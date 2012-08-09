@@ -26,10 +26,18 @@ var insertMessage = function(from, message) {
             message: message, 
             time: ts});
     } else {
-        Meteor.call("insertMessage", 
-            Session.get("currentRoom"), 
-            Session.get("color"), 
-            from, message, ts);
+        // Meteor.call("insertMessage", 
+        //     Session.get("currentRoom"), 
+        //     Session.get("color"), 
+        //     from, message, ts);
+        Messages.insert({
+            room: Session.get("currentRoom"),
+            color: Session.get("color"),
+            name: from, 
+            message: message, 
+            time: ts}
+        );
+
     }
 }
 
@@ -49,8 +57,13 @@ var roomHandler = function(message) {
     roomNameInput.value = "";
     roomPassInput.value = "";
     if (Session.equals("name", "you")) return;
-    var returnValue = (message == "create room" || message == "enter room");
-    if (returnValue) {
+    var returnValue = (message == "create room" || 
+        message == "enter room" ||
+        message == "destroy room" ||
+        message == "leave room");
+    if (message == "leave room") {
+        Session.set("currentRoom", "local");
+    } else if (returnValue) {
         Session.set("lastCommand", message);
         $('#passQueryModal').modal('show');
     }
@@ -77,11 +90,18 @@ var roomHandlerCallback = function() {
     var roomPass = roomPassInput.value;
     if (Session.equals("lastCommand", "create room")) {
         Meteor.call("createRoom", roomName, roomPass, function(e, result) {
-            if (result) insertMessage("eliza", "creating room " + roomName);   
+            if (result) {
+                insertMessage("eliza", "creating room " + roomName);
+                Session.set("currentRoom", roomName);
+            }
         });
     } else if (Session.equals("lastCommand", "enter room")) {
         Meteor.call("enterRoom", roomName, roomPass, function(e, result){
             if (result) Session.set("currentRoom", roomName);
+        });
+    } else if (Session.equals("lastCommand", "destroy room")) {
+        Meteor.call("destroyRoom", roomName, roomPass, function(e) {
+            if (!e) { Session.set("currentRoom", "local"); }
         });
     }
     $('#passQueryModal').modal('hide');
@@ -128,6 +148,11 @@ Template.messageList.messages = function() {
     return Session.equals("currentRoom", "local")?
         localMessages.find({room: "local"}) :
         Messages.find({room: Session.get("currentRoom")}); 
+}
+Template.messageList.scrolldown = function() {
+    Meteor.defer(function() {
+        window.scrollTo(0, document.body.scrollHeight);
+    });    
 }
 
 Template.roomModal.header = function() {
