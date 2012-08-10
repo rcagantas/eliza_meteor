@@ -18,7 +18,8 @@ var randomShade = function() {
 }
 
 var insertMessage = function(from, message) {
-    var ts = Date.now() / 1000;
+    //var ts = Date.now() / 1000;
+    var ts = +new Date() / 1000; // for IE8
     if (Session.equals("currentRoom", "local")) {
         localMessages.insert({
             room: "local",

@@ -33,7 +33,6 @@ Meteor.methods({
             message: message, 
             time: ts}
         );
-
     }
 });
 
