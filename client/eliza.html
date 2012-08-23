@@ -1,9 +1,8 @@
 <head>
-<title>Eliza</title>
+  <title id="titlenode">Eliza</title>
   <script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
   <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-5023e736550d4ef2"></script>
   <script type="text/javascript">
-
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-34035368-1']);
     _gaq.push(['_setDomainName', 'meteor.com']);
@@ -14,7 +13,6 @@
       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-
   </script>
 </head>
 
@@ -131,8 +129,8 @@
 
 <template name="messageList">
   {{#each messages}}
-    {{> message}}
     {{scrolldown}}
+    {{> message}}
   {{/each}}
 </template>
 

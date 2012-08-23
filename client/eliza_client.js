@@ -23,7 +23,6 @@ var insertMessage = function(from, message) {
             message: message, 
             time: ts}
         );
-
     }
 }
 
@@ -69,6 +68,7 @@ var messageHandlerCB = function() {
         insertMessage("eliza", reply);
     }
     messageInput.value = "";
+    document.title = "Eliza";
     window.scrollTo(0, document.body.scrollHeight);
 };
 
@@ -139,7 +139,15 @@ Template.messageList.messages = function() {
 Template.messageList.scrolldown = function() {
     Meteor.defer(function() {
         window.scrollTo(0, document.body.scrollHeight);
-    });    
+        var lastUpdateBy = 
+            Messages.findOne({room: Session.get("currentRoom")},
+                {sort: {time: -1}},
+                {fields: name});
+        if (!Session.equals("name",lastUpdateBy.name) && 
+            !Session.equals("currentRoom", "local")) {
+            document.title = "Eliza - " + lastUpdateBy.name ;
+        }
+    });
 }
 
 Template.roomForm.header = function() {
