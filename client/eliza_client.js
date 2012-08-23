@@ -6,17 +6,6 @@ var roomModalHeader = null;
 var localMessages = localMessages == null?
     new LocalCollection("localMessages") : localMessages;
 
-var rand = function(min, max) {
-    return parseInt(Math.random() * (max-min+1), 10) + min;
-}
-
-var randomShade = function() {
-    var h = rand(0, 10);
-    var s = rand(0, 10);
-    var l = rand(20, 60);
-    return 'hsl(' + h + ',' + s + '%,' + l + '%)';
-}
-
 var insertMessage = function(from, message) {
     //var ts = Date.now() / 1000;
     var ts = +new Date() / 1000; // for IE8
@@ -27,10 +16,6 @@ var insertMessage = function(from, message) {
             message: message, 
             time: ts});
     } else {
-        // Meteor.call("insertMessage", 
-        //     Session.get("currentRoom"), 
-        //     Session.get("color"), 
-        //     from, message, ts);
         Messages.insert({
             room: Session.get("currentRoom"),
             color: Session.get("color"),
@@ -49,35 +34,36 @@ var nameHandler = function(message) {
     if (result != null && result.length > 1) {
         Session.set("name", result[1]);
         Session.set("color", randomShade());
-        return true;
     }
-    return false;
 }
 
 var roomHandler = function(message) {
     roomNameInput.value = "";
     roomPassInput.value = "";
+    
     if (Session.equals("name", "you")) return;
-    var returnValue = (message == "create room" || 
+    var validCmd = (message == "create room" || 
         message == "enter room" ||
         message == "destroy room" ||
         message == "leave room");
     if (message == "leave room") {
         Session.set("currentRoom", "local");
-    } else if (returnValue) {
+    } else if (validCmd) {
         Session.set("lastCommand", message);
         $('#passQueryModal').modal('show');
     }
-    return returnValue;
 };
 
-var messageHandler = function() {
+var messageHandlerCB = function() {
     var message = messageInput.value;
     if (message == "") return;
     insertMessage(Session.get("name"), message);
 
-    if (nameHandler(message)) {}
-    else if (roomHandler(message)) {} 
+    if (message.startsWith(":")) {
+        message = message.slice(1, message.length);
+        nameHandler(message);
+        roomHandler(message);
+    }
     else if (Session.equals("currentRoom","local")) {
         var reply = elizaBot.transform(message);
         insertMessage("eliza", reply);
@@ -86,7 +72,7 @@ var messageHandler = function() {
     window.scrollTo(0, document.body.scrollHeight);
 };
 
-var roomHandlerCallback = function() {
+var roomHandlerCB = function() {
     var roomName = roomNameInput.value;
     var roomPass = roomPassInput.value;
     if (Session.equals("lastCommand", "create room")) {
@@ -156,21 +142,22 @@ Template.messageList.scrolldown = function() {
     });    
 }
 
-Template.roomModal.header = function() {
+Template.roomForm.header = function() {
     if (Session.equals("lastCommand", "create room")) return "Create Room";
     else if (Session.equals("lastCommand", "enter room")) return "Enter Room";
     return "Default";
 };
 Template.entry.events = {};
-Template.entry.events['click #messageInputBtn'] = messageHandler;
+Template.entry.events['click #messageInputBtn'] = messageHandlerCB;
 Template.entry.events[okcancel_events("#messageInput")] = 
 make_okcancel_handler({
-    ok: messageHandler
+    ok: messageHandlerCB
 });
 Template.roomForm.events = {};
+Template.roomForm.events['click #roomSetBtn'] = roomHandlerCB;
 Template.roomForm.events[okcancel_events("#roomPassInput")] =
 make_okcancel_handler({
-    ok: roomHandlerCallback
+    ok: roomHandlerCB
 });
 
 

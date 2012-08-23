@@ -51,6 +51,8 @@
     <p>I am an enterprise Java/C++ developer for a major investment bank in Singapore. Occassionally, I try some new technologies.</p>
     <h3>Contact me!</h3>
     <ul class="icons">
+      <li><h4><a href="http://roelcagantas.blogspot.com">
+        <i class="icon-edit"></i>Blog</a></h4></li>
       <li><h4><a href="https://twitter.com/m9dhatter">
         <i class="icon-twitter"></i>Twitter</a></h4></li>
       <li><h4><a href="https://plus.google.com/105063919888934724817/posts">
@@ -100,36 +102,31 @@
       </div>
     </div>
   </div>
-
-  <div class="modal hide keyboard fade" id="passQueryModal">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">×</button>
-      {{> roomModal}}
-    </div>
-    <div class="modal-body">
-      <form class="well inline" onsubmit="return false;">
-        {{> roomForm}}
-      </form>
-    </div>
-    <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss="modal">Close</a>
-      <a href="#" class="btn btn-primary" data-dismiss="modal">Save</a>
-    </div>
-  </div>
+  {{> roomForm}}
 </template>
 
 <template name="roomForm">
-  <input id="roomNameInput" type="text" placeholder="room name">
-  <input id="roomPassInput" type="password" placeholder="room password">
+    <div class="modal hide keyboard fade" id="passQueryModal">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>{{header}}</h3>
+      </div>
+      <div class="modal-body">
+        <form class="well inline" onsubmit="return false;">
+          <input id="roomNameInput" type="text" placeholder="room name">
+          <input id="roomPassInput" type="password" placeholder="room password">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+        <a id="roomSetBtn" href="#" class="btn btn-primary" data-dismiss="modal">Set</a>
+      </div>
+    </div>
 </template>
 
 <template name="entry">
   <input id="messageInput" type="text" autofocus="autofocus" class="span6" placeholder="Type your message here.">
   <button id="messageInputBtn" class="btn btn-primary span1">Post</button>
-</template>
-
-<template name="roomModal">
-  <h3>{{header}}</h3>
 </template>
 
 <template name="messageList">
