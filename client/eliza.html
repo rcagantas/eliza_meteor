@@ -1,5 +1,5 @@
 <head>
-  <title id="titlenode">Eliza</title>
+  <title>Eliza</title>
   <script type="text/javascript">var addthis_config = {"data_track_addressbar":true};</script>
   <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-5023e736550d4ef2"></script>
   <script type="text/javascript">
@@ -95,12 +95,25 @@
           {{> entry}}
         </form>
       </div>
-      <div class="container">
-        <p></p>
-      </div>
     </div>
   </div>
   {{> roomForm}}
+</template>
+
+<template name="entry">
+  <input id="messageInput" type="text" autofocus="autofocus" class="span6" placeholder="Type your message here.">
+  <button id="messageInputBtn" class="btn btn-primary">Post</button>
+</template>
+
+<template name="messageList">
+  {{#each messages}}
+    {{scrolldown}}
+    {{> message}}
+  {{/each}}
+</template>
+
+<template name="message">
+  <strong style="color: {{color}};">{{name}}: </strong>{{message}}<br>
 </template>
 
 <template name="roomForm">
@@ -120,20 +133,4 @@
         <a id="roomSetBtn" href="#" class="btn btn-primary" data-dismiss="modal">Set</a>
       </div>
     </div>
-</template>
-
-<template name="entry">
-  <input id="messageInput" type="text" autofocus="autofocus" class="span6" placeholder="Type your message here.">
-  <button id="messageInputBtn" class="btn btn-primary span1">Post</button>
-</template>
-
-<template name="messageList">
-  {{#each messages}}
-    {{scrolldown}}
-    {{> message}}
-  {{/each}}
-</template>
-
-<template name="message">
-  <strong style="color: {{color}};">{{name}}: </strong>{{message}}<br>
 </template>

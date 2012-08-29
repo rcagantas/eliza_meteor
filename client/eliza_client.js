@@ -28,12 +28,14 @@ var insertMessage = function(from, message) {
 
 var nameHandler = function(message) {
     message = message.toLowerCase();
-    var regex = /my name is ([a-z0-9]+)/g;
+    var regex = /^my name is ([a-z0-9]+)/g;
     var result = regex.exec(message);
     if (result != null && result.length > 1) {
         Session.set("name", result[1]);
         Session.set("color", randomShade());
+        return true;
     }
+    return false;
 }
 
 var roomHandler = function(message) {
@@ -50,25 +52,24 @@ var roomHandler = function(message) {
     } else if (validCmd) {
         Session.set("lastCommand", message);
         $('#passQueryModal').modal('show');
+        return true;
     }
+    return false;
 };
 
 var messageHandlerCB = function() {
+    document.title = "Eliza";
     var message = messageInput.value;
     if (message == "") return;
     insertMessage(Session.get("name"), message);
 
-    if (message.startsWith(":")) {
-        message = message.slice(1, message.length);
-        nameHandler(message);
-        roomHandler(message);
-    }
-    else if (Session.equals("currentRoom","local")) {
+    nameHandler(message);
+    roomHandler(message);
+    if (Session.equals("currentRoom","local")) {
         var reply = elizaBot.transform(message);
         insertMessage("eliza", reply);
     }
     messageInput.value = "";
-    document.title = "Eliza";
     window.scrollTo(0, document.body.scrollHeight);
 };
 
@@ -143,7 +144,7 @@ Template.messageList.scrolldown = function() {
             Messages.findOne({room: Session.get("currentRoom")},
                 {sort: {time: -1}},
                 {fields: name});
-        if (!Session.equals("name",lastUpdateBy.name) && 
+        if (!Session.equals("name", lastUpdateBy.name) && 
             !Session.equals("currentRoom", "local")) {
             document.title = "Eliza - " + lastUpdateBy.name ;
         }
@@ -155,8 +156,10 @@ Template.roomForm.header = function() {
     else if (Session.equals("lastCommand", "enter room")) return "Enter Room";
     return "Default";
 };
+
 Template.entry.events = {};
 Template.entry.events['click #messageInputBtn'] = messageHandlerCB;
+//Template.entry.events['click #messageInput'] = messageHandlerCB;
 Template.entry.events[okcancel_events("#messageInput")] = 
 make_okcancel_handler({
     ok: messageHandlerCB
