@@ -133,11 +133,11 @@ Template.pageSelector.renderPage = function() {
 }
 
 Template.messageList.messages = function() { 
-    var items = Session.equals("currentRoom", "local")?
-        localMessages.find({room: "local"}).fetch() :
-        Messages.find({room: Session.get("currentRoom")}).fetch(); 
-    return items.slice(-500);
+    return Session.equals("currentRoom", "local")?
+        localMessages.find({room: "local"}) :
+        Messages.find({room: Session.get("currentRoom")}); 
 }
+
 Template.messageList.scrolldown = function() {
     Meteor.defer(function() {
         window.scrollTo(0, document.body.scrollHeight);
