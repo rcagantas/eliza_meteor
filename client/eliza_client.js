@@ -42,7 +42,7 @@ var roomHandler = function(message) {
     roomNameInput.value = "";
     roomPassInput.value = "";
     
-    if (Session.equals("name", "you")) return;
+    if (Session.equals("name", "you")) { return; }
     var validCmd = (message == "create room" || 
         message == "enter room" ||
         message == "destroy room" ||
@@ -57,12 +57,15 @@ var roomHandler = function(message) {
     return false;
 };
 
-var messageHandlerCB = function() {
+var messageHandlerCB = function(evt) {
+    if (evt.type == "keydown" && evt.which != 13) { return; }
+
     document.title = "Eliza";
     var message = messageInput.value;
-    if (message == "") return;
-    insertMessage(Session.get("name"), message);
-
+    if (message == "") { return }
+    
+    if (message != "leave room")
+        insertMessage(Session.get("name"), message);
     nameHandler(message);
     roomHandler(message);
     if (Session.equals("currentRoom","local")) {
@@ -73,7 +76,9 @@ var messageHandlerCB = function() {
     window.scrollTo(0, document.body.scrollHeight);
 };
 
-var roomHandlerCB = function() {
+var roomHandlerCB = function(evt) {
+    if (evt.type == "keydown" && evt.which != 13) { return; }
+    
     var roomName = roomNameInput.value;
     var roomPass = roomPassInput.value;
     if (Session.equals("lastCommand", "create room")) {
@@ -85,7 +90,7 @@ var roomHandlerCB = function() {
         });
     } else if (Session.equals("lastCommand", "enter room")) {
         Meteor.call("enterRoom", roomName, roomPass, function(e, result){
-            if (result) Session.set("currentRoom", roomName);
+            if (result) { Session.set("currentRoom", roomName); }
         });
     } else if (Session.equals("lastCommand", "destroy room")) {
         Meteor.call("destroyRoom", roomName, roomPass, function(e) {
@@ -132,10 +137,13 @@ Template.pageSelector.renderPage = function() {
     return new Handlebars.SafeString(Template[template]());
 }
 
-Template.messageList.messages = function() { 
+Template.messageList.messages = function() {
+    var weekago = new Date();
+    weekago.setDate(weekago.getDate() - 7);
+    var weekagoint = weekago / 1000;
     return Session.equals("currentRoom", "local")?
         localMessages.find({room: "local"}) :
-        Messages.find({room: Session.get("currentRoom")}); 
+        Messages.find({room: Session.get("currentRoom"), time: { $gt: weekagoint}}); 
 }
 
 Template.messageList.scrolldown = function() {
@@ -153,23 +161,17 @@ Template.messageList.scrolldown = function() {
 }
 
 Template.roomForm.header = function() {
-    if (Session.equals("lastCommand", "create room")) return "Create Room";
-    else if (Session.equals("lastCommand", "enter room")) return "Enter Room";
+    if (Session.equals("lastCommand", "create room")) { return "Create Room"; }
+    else if (Session.equals("lastCommand", "enter room")) { return "Enter Room"; }
     return "Default";
 };
 
-Template.entry.events = {};
-Template.entry.events['click #messageInputBtn'] = messageHandlerCB;
-//Template.entry.events['click #messageInput'] = messageHandlerCB;
-Template.entry.events[okcancel_events("#messageInput")] = 
-make_okcancel_handler({
-    ok: messageHandlerCB
-});
-Template.roomForm.events = {};
-Template.roomForm.events['click #roomSetBtn'] = roomHandlerCB;
-Template.roomForm.events[okcancel_events("#roomPassInput")] =
-make_okcancel_handler({
-    ok: roomHandlerCB
+Template.entry.events({
+    'click #messageInputBtn': messageHandlerCB,
+    'keydown #messageInput': messageHandlerCB
 });
 
-
+Template.roomForm.events({
+    'click #roomSetBtn': roomHandlerCB,
+    'keydown #roomPassInput': roomHandlerCB
+});
