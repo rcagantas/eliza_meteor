@@ -17,6 +17,11 @@
 </head>
 
 <body>
+  {{> header}}
+  {{> pageSelector}}
+</body>
+
+<template name="header">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
@@ -35,9 +40,7 @@
       </div>
     </div>
   </div>
-
-  {{> pageSelector}}
-</body>
+</template>
 
 <template name="pageSelector">
   {{renderPage}}
