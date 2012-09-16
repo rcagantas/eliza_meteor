@@ -1,8 +1,8 @@
 var elizaBot = null;
-var messageInput = null;
-var roomNameInput = null;
-var roomPassInput = null;
-var roomModalHeader = null;
+Session.set("name","you");
+Session.set("currentRoom", "local");
+Session.set("currentPage", "mainPage");
+
 var localMessages = localMessages == null?
     new LocalCollection("localMessages") : localMessages;
 
@@ -39,8 +39,8 @@ var nameHandler = function(message) {
 }
 
 var roomHandler = function(message) {
-    roomNameInput.value = "";
-    roomPassInput.value = "";
+    $('#roomNameInput').val("");
+    $('#roomPassInput').val("");
     
     if (Session.equals("name", "you")) { return; }
     var validCmd = (message == "create room" || 
@@ -51,6 +51,7 @@ var roomHandler = function(message) {
         Session.set("currentRoom", "local");
     } else if (validCmd) {
         Session.set("lastCommand", message);
+        Meteor.flush();
         $('#passQueryModal').modal('show');
         return true;
     }
@@ -58,11 +59,11 @@ var roomHandler = function(message) {
 };
 
 var messageHandlerCB = function(evt) {
-    if (evt.type == "keydown" && evt.which != 13) { return; }
+    if (evt.type == "keydown" && evt.which != 13) return;
 
     document.title = "Eliza";
-    var message = messageInput.value;
-    if (message == "") { return }
+    var message = $("#messageInput").val();
+    if (message == "") return;
     
     if (message != "leave room")
         insertMessage(Session.get("name"), message);
@@ -72,15 +73,15 @@ var messageHandlerCB = function(evt) {
         var reply = elizaBot.transform(message);
         insertMessage("eliza", reply);
     }
-    messageInput.value = "";
+    $("#messageInput").val("");
     window.scrollTo(0, document.body.scrollHeight);
 };
 
 var roomHandlerCB = function(evt) {
-    if (evt.type == "keydown" && evt.which != 13) { return; }
+    if (evt.type == "keydown" && evt.which != 13) return;
     
-    var roomName = roomNameInput.value;
-    var roomPass = roomPassInput.value;
+    var roomName = $("#roomNameInput").val();
+    var roomPass = $("#roomPassInput").val();
     if (Session.equals("lastCommand", "create room")) {
         Meteor.call("createRoom", roomName, roomPass, function(e, result) {
             if (result) {
@@ -97,27 +98,14 @@ var roomHandlerCB = function(evt) {
             if (!e) { Session.set("currentRoom", "local"); }
         });
     }
-    $('#passQueryModal').modal('hide');
-    messageInput.focus();
+    $("#passQueryModal").modal('hide');
+    $("#messageInput").focus();
     window.scrollTo(0, document.body.scrollHeight);
 };
 
 Meteor.startup(function() {
-    messageInput = document.getElementById('messageInput');
-    roomNameInput = document.getElementById('roomNameInput');
-    roomPassInput = document.getElementById("roomPassInput");
-    roomModalHeader = document.getElementById("roomModalHeader");
-    Session.set("name","you");
-    Session.set("currentRoom", "local");
-    Session.set("currentPage", "mainPage");
     Meteor.autosubscribe(function() {
         Meteor.subscribe("messages", Session.get("currentRoom"));
-    });
-    $('#passQueryModal').on('hidden', function () {
-        messageInput.focus();
-    });
-    $('#passQueryModal').on('shown', function () {
-        roomNameInput.focus();
     });
     elizaBot = new ElizaBot();
     var initial = elizaBot.getInitial();
@@ -133,7 +121,6 @@ Meteor.startup(function() {
 
 Template.pageSelector.renderPage = function() {
     var template = Session.get("currentPage");
-    template = template == undefined? "mainPage" : template;
     return new Handlebars.SafeString(Template[template]());
 }
 
@@ -160,10 +147,20 @@ Template.messageList.scrolldown = function() {
     });
 }
 
-Template.roomForm.header = function() {
+Template.roomForm.rendered = function() {
+    $('#passQueryModal').on('hidden', function () {
+        $("#messageInput").focus();
+    });
+    $('#passQueryModal').on('shown', function () {
+        $("#roomNameInput").focus();
+    });
+}
+
+Template.roomForm.roomHeader = function() {
     if (Session.equals("lastCommand", "create room")) { return "Create Room"; }
     else if (Session.equals("lastCommand", "enter room")) { return "Enter Room"; }
-    return "Default";
+    else if (Session.equals("lastCommand", "destroy room")) { return "Destroy Room"; }
+    return "Room Handler";
 };
 
 Template.entry.events({
