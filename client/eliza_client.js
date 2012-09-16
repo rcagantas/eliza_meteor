@@ -1,7 +1,6 @@
 var elizaBot = null;
 Session.set("name","you");
 Session.set("currentRoom", "local");
-Session.set("currentPage", "mainPage");
 
 var localMessages = localMessages == null?
     new LocalCollection("localMessages") : localMessages;
@@ -112,15 +111,28 @@ Meteor.startup(function() {
     insertMessage("eliza", initial);
 
     var Workspace = Backbone.Router.extend({
-        routes: { ":page": "redirect" },
+        routes: { "":"main", ":page": "redirect" },
+        main: function(){Session.set("currentPage","mainPage");},
         redirect: function(page) { Session.set("currentPage", page + "Page"); }
     });
     Router = new Workspace;
     Backbone.history.start({pushState: true});
 });
+//Header events
+Template.header.events({
+    'click .nav a':function(evt){
+        Router.navigate($(evt.target).attr("href"), {trigger: true});
+        evt.preventDefault();
+    },
+    'click a.brand':function(evt){
+        Router.navigate($(evt.target).attr("href"), {trigger: true});
+        evt.preventDefault();
+    }
+})
 
 Template.pageSelector.renderPage = function() {
     var template = Session.get("currentPage");
+    template = template == undefined? "mainPage" : template;
     return new Handlebars.SafeString(Template[template]());
 }
 
